@@ -1,0 +1,21 @@
+env: dev
+appName: go-library-management
+port: 8082
+db:
+  host: lms_db
+  port: 5432
+  dbname: lms
+  username: lms_user
+  password: password
+redis:
+  address: "redis:6379"
+  db: 1
+  bookCache:
+    key: books
+    ttl: 10m
+  authorCache:
+    key: authors
+    ttl: 10m
+  bookAuthorCache:
+    key: book_authors
+    ttl: 10m

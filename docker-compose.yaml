@@ -1,0 +1,39 @@
+services:
+  lms_db:
+    image: postgres:14-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=lms_user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=lms
+    ports:
+      - "5433:5432"
+    volumes:
+      - lms_db_data:/var/lib/postgresql/data
+  migrator:
+    image: amacneil/dbmate
+    environment:
+      - LMS_DATABASE_URL=postgres://lms_user:password@lms_db:5432/lms?sslmode=disable
+    depends_on:
+      - lms_db
+    volumes:
+      - ./db/migrations:/db
+      - ./scripts/entrypoint.sh:/app/entrypoint.sh
+    entrypoint: ["/bin/sh", "-c", "chmod +x /app/entrypoint.sh && /app/entrypoint.sh"]
+  go_library_management:
+    build: .
+    ports:
+      - "8082:8082"
+    depends_on:
+      - lms_db
+  redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - "6381:6379"
+    volumes:
+      - lms_redis_data:/redis
+volumes:
+  lms_db_data:
+  lms_redis_data:
+    

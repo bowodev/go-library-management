@@ -1,0 +1,7 @@
+#!/bin/sh
+
+echo "MIGRATION PROCESS STARTED"
+
+dbmate -d /db -e LMS_DATABASE_URL migrate
+
+echo "MIGRATION PROCESS COMPLETED"
