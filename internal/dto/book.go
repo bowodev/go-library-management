@@ -25,3 +25,50 @@ func (b Book) ToModel() model.Book {
 		AuthorId:    b.Author.ID,
 	}
 }
+
+func (b Books) ToModels() []model.Book {
+	books := []model.Book{}
+	for _, v := range b {
+		books = append(books, v.ToModel())
+	}
+
+	return books
+}
+
+func (b *Book) FromModel(m model.Book) {
+	if b == nil {
+		b = &Book{}
+	}
+
+	b.ID = m.ID
+	b.Title = m.Title
+	b.Description = m.Description
+	b.PublishDate = m.PublishDate
+	b.Author = Author{
+		ID:        m.AuthorId,
+		Name:      m.Author.Name,
+		Bio:       m.Author.Bio,
+		BirthDate: m.Author.BirthDate,
+	}
+}
+
+func (b *Books) FromModels(m []model.Book) {
+	books := Books{}
+
+	for _, v := range m {
+		books = append(books, Book{
+			ID:          v.ID,
+			Title:       v.Title,
+			Description: v.Description,
+			PublishDate: v.PublishDate,
+			Author: Author{
+				ID:        v.AuthorId,
+				Name:      v.Author.Name,
+				Bio:       v.Author.Bio,
+				BirthDate: v.Author.BirthDate,
+			},
+		})
+	}
+
+	*b = books
+}

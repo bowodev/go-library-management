@@ -21,11 +21,18 @@ services:
       - ./scripts/entrypoint.sh:/app/entrypoint.sh
     entrypoint: ["/bin/sh", "-c", "chmod +x /app/entrypoint.sh && /app/entrypoint.sh"]
   go_library_management:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app # Mount the source code to enable hot reload
+      - /app/bin # Avoid overwriting binaries
     ports:
       - "8082:8082"
     depends_on:
       - lms_db
+    environment:
+      - AIR_ENV=dev # Optional: Set a custom environment variable
   redis:
     image: redis:latest
     restart: always

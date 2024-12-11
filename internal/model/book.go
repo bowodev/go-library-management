@@ -10,6 +10,7 @@ type Book struct {
 	Description string    `gorm:"description"`
 	PublishDate time.Time `gorm:"column:publish_date"`
 	AuthorId    int64     `gorm:"column:author_id"`
+	Author      Author    `gorm:"-"`
 
 	CreatedAt time.Time `gorm:"column:created_at"`
 	UpdatedAt time.Time `gorm:"column:updated_at"`

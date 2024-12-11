@@ -38,20 +38,66 @@ func main() {
 	}
 
 	db := postgres.New(cfg)
+
 	bookCache, r := redis.New[dto.Book](cfg, "book", 24*time.Hour)
 	defer r.Close()
 
-	validator := govalidator.New()
+	bookByAuthorCache, r1 := redis.New[dto.Books](cfg, "book-by-author", 24*time.Hour)
+	defer r1.Close()
 
+	authorCache, r2 := redis.New[dto.Author](cfg, "author", 24*time.Hour)
+	defer r2.Close()
+
+	validator := govalidator.New()
 	repository := repository.New(db)
+
+	// books
 	bookCreator := usecase.NewCreateBook(repository, bookCache, validator)
-	bookController := controller.NewBookController(bookCreator)
+	bookDeleter := usecase.NewDeleteBook(repository, bookCache)
+	bookUpdater := usecase.NewUpdateBook(repository, validator, bookCache)
+	bookAllGetter := usecase.NewBookAllGetter(repository)
+	bookGetter := usecase.NewGetBook(bookCache, repository)
+	byAuthorBookGetter := usecase.NewGetBookByAuthor(repository, bookByAuthorCache)
+	bookController := controller.NewBookController(
+		bookCreator,
+		bookUpdater,
+		bookDeleter,
+		bookGetter,
+		bookAllGetter,
+		byAuthorBookGetter,
+	)
+
+	// author
+	authorCreator := usecase.NewAuthorCreator(repository, authorCache, validator)
+	authorDeleter := usecase.NewAuthorDeleter(repository, authorCache, bookCache)
+	authorUpdater := usecase.NewAuthorUpdater(repository, authorCache, validator)
+	authorGetter := usecase.NewAuthorGetter(repository, authorCache)
+	authorAllGetter := usecase.NewAuthorAllGetter(repository)
+	authorController := controller.NewAuthorController(
+		authorCreator,
+		authorUpdater,
+		authorDeleter,
+		authorGetter,
+		authorAllGetter,
+	)
 
 	app := fiber.New()
 	app.Use(recover.New())
 
 	bookGroup := app.Group("/v1/books")
 	bookGroup.Post("", bookController.Create)
+	bookGroup.Put("/:id", bookController.Update)
+	bookGroup.Delete("/:id", bookController.Delete)
+	bookGroup.Get("", bookController.GetAll)
+	bookGroup.Get("/:id", bookController.GetById)
+
+	authorGroup := app.Group("/v1/authors")
+	authorGroup.Post("", authorController.Create)
+	authorGroup.Put("/:id", authorController.Update)
+	authorGroup.Delete("/:id", authorController.Delete)
+	authorGroup.Get("", authorController.GetAll)
+	authorGroup.Get("/:id", authorController.GetById)
+	authorGroup.Get("/:authorId/books", bookController.GetByAuthor)
 
 	go func() {
 		if err := app.Listen(":" + cfg.Port); err != nil {

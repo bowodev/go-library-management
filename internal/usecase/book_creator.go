@@ -10,20 +10,20 @@ import (
 	"github.com/bowodev/go-library-management/internal/utils"
 )
 
-type bookCreator struct {
+type createBook struct {
 	repository interfaces.IRepository
 	cacher     interfaces.ICache[dto.Book]
 	validator  interfaces.IValidator
 }
 
-var _ interfaces.ICreateBook = (*bookCreator)(nil)
+var _ interfaces.ICreateBook = (*createBook)(nil)
 
 func NewCreateBook(
 	repository interfaces.IRepository,
 	cacher interfaces.ICache[dto.Book],
 	validator interfaces.IValidator,
-) *bookCreator {
-	return &bookCreator{
+) *createBook {
+	return &createBook{
 		repository: repository,
 		cacher:     cacher,
 		validator:  validator,
@@ -31,7 +31,7 @@ func NewCreateBook(
 }
 
 // Do implements interfaces.ICreateBook.
-func (b *bookCreator) Do(ctx context.Context, in dto.Book) (dto.Book, error) {
+func (b *createBook) Do(ctx context.Context, in dto.Book) (dto.Book, error) {
 	if in.Author.ID < 1 {
 		return dto.Book{}, utils.ErrInvalidAuthorId
 	}

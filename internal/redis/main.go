@@ -8,6 +8,7 @@ import (
 
 	"github.com/bowodev/go-library-management/config"
 	"github.com/bowodev/go-library-management/internal/interfaces"
+	"github.com/gofiber/fiber/v2/log"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -37,8 +38,8 @@ func (r *redisClient[T]) Set(ctx context.Context, key string, value T) error {
 	keyFormat := fmt.Sprintf("%s.%s", r.key, key)
 
 	exists, _ := r.client.Get(ctx, keyFormat).Result()
-	if exists == "" {
-		return nil
+	if exists != "" {
+		log.Warn("overwrite current cache")
 	}
 
 	return r.client.SetNX(ctx, r.key, value, r.ttl).Err()

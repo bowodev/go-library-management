@@ -1,0 +1,23 @@
+# Config file for Air
+
+[build]
+# Command to build your Go app
+cmd = "go build -o main ./cmd"
+# Binary file produced by the build command
+bin = "main"
+# Whether to rebuild on changes to `.air.toml`
+include_config = true
+
+[run]
+# Command to run the built binary
+cmd = "./main"
+# Watch these directories for changes
+watch_dir = ["."]
+# Files to watch (glob pattern)
+include_ext = ["go", "yaml"]
+# Files to exclude
+exclude_dir = ["vendor", ".git"]
+
+[log]
+# Show Air logs
+level = "debug"
